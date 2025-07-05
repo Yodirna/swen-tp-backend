@@ -28,6 +28,9 @@ public class TourEntity {
 
     private String transportType;
 
+    private double distance; // in meters
+    private double duration; // in seconds
+
     @Column(name="map_image_path")
     private String mapImagePath;
 
