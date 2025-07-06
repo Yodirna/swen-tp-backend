@@ -1,5 +1,6 @@
 package com.swen.tpbackend.dal.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -12,6 +13,7 @@ import java.util.List;
 @Getter
 @Entity
 @Table(name = "tours")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TourEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +30,9 @@ public class TourEntity {
 
     private String transportType;
 
+    @Column(nullable = true)
     private double distance; // in meters
+    @Column(nullable = true)
     private double duration; // in seconds
 
     @Column(name="map_image_path")
@@ -37,5 +41,19 @@ public class TourEntity {
     @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<TourLogEntity> logs = new ArrayList<>();
+
+    @Override
+    public String toString() {
+        return "TourEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", fromLocation='" + fromLocation + '\'' +
+                ", toLocation='" + toLocation + '\'' +
+                ", transportType='" + transportType + '\'' +
+                ", distance=" + distance +
+                ", duration=" + duration +
+                '}';
+    }
 
 }

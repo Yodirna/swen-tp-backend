@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface TourLogRepository extends JpaRepository<TourLogEntity, Long> {
-    // Spring Data auto-implements this (Not in use for now)
-    List<TourLogEntity> findByTourOrderByDateTimeDesc(TourEntity tour);
+    int countByTourId(Long tourId);
+    List<TourLogEntity> findByTourId(Long tourId);
 }

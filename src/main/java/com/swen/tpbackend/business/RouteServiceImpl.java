@@ -33,7 +33,7 @@ public class RouteServiceImpl implements RouteService {
         body.put("coordinates", Arrays.asList(fromCoords, toCoords));
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
-        String profile = (transportType == null) ? "driving-car" : transportType;
+        String profile = mapTransportType(transportType);
         ResponseEntity<Map> response = restTemplate.exchange(
                 ORS_URL, HttpMethod.POST, entity, Map.class, profile
         );
@@ -52,6 +52,30 @@ public class RouteServiceImpl implements RouteService {
                 .geometry(coordinates)
                 .build();
     }
+
+    private String mapTransportType(String input) {
+        if (input == null) return "driving-car";
+        switch (input.toLowerCase()) {
+            case "car":
+            case "driving-car":
+                return "driving-car";
+            case "hgv":
+            case "driving-hgv":
+                return "driving-hgv";
+            case "cycling":
+            case "cycling-regular":
+            case "bike":
+                return "cycling-regular";
+            case "foot":
+            case "walking":
+            case "foot-walking":
+                return "foot-walking";
+            // ... add more as needed
+            default:
+                return "driving-car";
+        }
+    }
+
 
     private List<Double> geocodeAddress(String address) {
         String url = ORS_GEOCODE_URL + "?api_key=" + orsApiKey + "&text=" + address;

@@ -1,10 +1,11 @@
 package com.swen.tpbackend.dal.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
 
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -17,4 +18,8 @@ public class TourDto {
     private String transportType;
     private String fromLocation;
     private String toLocation;
+    private double distance;
+    private double duration;
+    //private int popularity;
+    //private boolean childFriendly;
 }

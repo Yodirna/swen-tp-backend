@@ -35,12 +35,12 @@ public class TourLogController {
     }
 
     @PostMapping
-    public List<TourLogDto> createLog(@PathVariable Long tourId,
-                                      @RequestBody TourLogDto dto) {
+    public ResponseEntity<TourLogDto> createLog(@PathVariable Long tourId,
+                                                @RequestBody TourLogDto dto) {
         TourEntity tour = logService.getTourById(tourId);
 
-        // Add the new log
-        logService.addLog(
+        // Add the new log, capture the new log entity (adjust your service if needed)
+        TourLogEntity newLog = logService.addLog(
                 tour,
                 dto.getDateTime(),
                 dto.getRating(),
@@ -50,10 +50,9 @@ public class TourLogController {
                 dto.getComment()
         );
 
-        // Map and return all logs for the tour
-        return tour.getLogs().stream()
-                .map(tourMapper::mapToDto) //Changed recently
-                .toList();
+        // Map and return only the new log as DTO
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(tourMapper.mapToDto(newLog));
     }
 
 

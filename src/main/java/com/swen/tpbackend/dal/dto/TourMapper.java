@@ -16,6 +16,8 @@ public class TourMapper
         e.setFromLocation(dto.getFromLocation());
         e.setToLocation(dto.getToLocation());
         e.setTransportType(dto.getTransportType());
+        e.setDistance(dto.getDistance());
+        e.setDuration(dto.getDuration());
         e.setMapImagePath(dto.getMapImagePath());
         return e;
     }
@@ -29,6 +31,8 @@ public class TourMapper
         dto.setToLocation(e.getToLocation());
         dto.setTransportType(e.getTransportType());
         dto.setMapImagePath(e.getMapImagePath());
+        dto.setDistance(e.getDistance());
+        dto.setDuration(e.getDuration());
         return dto;
     }
 
