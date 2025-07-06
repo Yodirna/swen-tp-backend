@@ -22,7 +22,7 @@ public class WebTourController {
     public String getTours(Model model) {
         List<TourEntity> tours = tourService.getAllTours();
         model.addAttribute("tours", tours);
-        return "tours"; // Name of your template (tourList.html)
+        return "tours"; //
     }
 
 }

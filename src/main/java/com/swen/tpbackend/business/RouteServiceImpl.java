@@ -1,6 +1,7 @@
 package com.swen.tpbackend.business;
 
 import com.swen.tpbackend.dal.dto.RouteDto;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -10,13 +11,20 @@ import java.util.*;
 @Service
 public class RouteServiceImpl implements RouteService {
 
+
+    @Setter
     @Value("${openrouteservice.api-key}")
     private String orsApiKey;
 
+    private final RestTemplate restTemplate;
+
+    // Add a constructor for injection
+    public RouteServiceImpl(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
     private static final String ORS_URL = "https://api.openrouteservice.org/v2/directions/{profile}/geojson";
     private static final String ORS_GEOCODE_URL = "https://api.openrouteservice.org/geocode/search";
-
-    private final RestTemplate restTemplate = new RestTemplate();
 
     @Override
     public RouteDto getRoute(String from, String to, String transportType) {
@@ -70,7 +78,6 @@ public class RouteServiceImpl implements RouteService {
             case "walking":
             case "foot-walking":
                 return "foot-walking";
-            // ... add more as needed
             default:
                 return "driving-car";
         }
@@ -85,4 +92,6 @@ public class RouteServiceImpl implements RouteService {
         Map geometry = (Map) ((Map)features.get(0)).get("geometry");
         return (List<Double>) geometry.get("coordinates"); // [lng, lat]
     }
+
+
 }
