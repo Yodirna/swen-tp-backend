@@ -1,7 +1,10 @@
 package com.swen.tpbackend.dal.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,6 +44,37 @@ public class TourEntity {
     @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<TourLogEntity> logs = new ArrayList<>();
+
+
+    @Setter
+    @Lob
+    @Column(name = "geometry", columnDefinition = "TEXT")
+    private String geometryJson; // will store as JSON
+
+    @JsonIgnore // Don't send to frontend
+    public String getGeometryJson() {
+        return geometryJson;
+    }
+
+    // Convenience methods for (de)serializing as List<List<Double>>
+    @Transient
+    public List<List<Double>> getGeometry() {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return geometryJson == null ? null : mapper.readValue(geometryJson, new TypeReference<>(){});
+        } catch (Exception e) { return null; }
+    }
+
+    @Transient
+    public void setGeometry(List<List<Double>> geometry) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            this.geometryJson = mapper.writeValueAsString(geometry);
+        } catch (Exception e) {
+            this.geometryJson = null;
+        }
+    }
+
 
     @Override
     public String toString() {

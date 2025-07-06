@@ -9,6 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 import java.net.URI;
 
@@ -17,6 +20,7 @@ import java.net.URI;
 public class TourController {
 
     private final TourService tourService;
+    private static final Logger logger = LogManager.getLogger(TourService.class);
 
     public TourController(TourService tourService) {
         this.tourService = tourService;
@@ -25,6 +29,8 @@ public class TourController {
     @GetMapping("/{tourId}")
     public ResponseEntity<TourDto> getTour(@PathVariable("tourId") Long tourId) {
         TourEntity entity = tourService.getTour(tourId);
+        int popularity = tourService.computePopularity(tourId);
+        boolean childFriendly = tourService.isChildFriendly(tourId);
         // map entity → change to use TourMapper later
         TourDto dto = TourDto.builder()
                 .id(entity.getId())
@@ -34,7 +40,10 @@ public class TourController {
                 .transportType(entity.getTransportType())
                 .fromLocation(entity.getFromLocation())
                 .toLocation(entity.getToLocation())
+                .popularity(popularity)
+                .childFriendly(childFriendly)
                 .build();
+        logger.info("Sending Tour to frontend: " + dto);
         return ResponseEntity.ok(dto);
     }
 
@@ -46,7 +55,9 @@ public class TourController {
         // ID from pathvariable
         entity.setId(tourId);
         tourService.updateTour(entity);
-        return ResponseEntity.ok(mapper.toDto(entity)); // Maybe I should return the actual updated Data
+        int popularity = tourService.computePopularity(entity.getId());
+        boolean childFriendly = tourService.isChildFriendly(entity.getId());
+        return ResponseEntity.ok(mapper.toDto(entity, popularity, childFriendly));
     }
 
     @PostMapping("/add")
@@ -61,6 +72,8 @@ public class TourController {
                 .buildAndExpand(created.getId())  // replaces {id}
                 .toUri();
 
+
+        logger.info("Sending Tour to frontend: " + created);
         // Return 201 Created with Location header + body
         return ResponseEntity
                 .created(location)
@@ -72,7 +85,11 @@ public class TourController {
         List<TourEntity> entities = tourService.getAllTours();
         TourMapper mapper = new TourMapper();
         List<TourDto> dtos = entities.stream()
-                .map(mapper::toDto)
+                .map(entity -> {
+                    int popularity = tourService.computePopularity(entity.getId());
+                    boolean childFriendly = tourService.isChildFriendly(entity.getId());
+                    return mapper.toDto(entity, popularity, childFriendly);
+                })
                 .toList();
         return ResponseEntity.ok(dtos);
     }

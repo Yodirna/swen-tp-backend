@@ -1,8 +1,10 @@
 package com.swen.tpbackend.dal.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
+import java.util.List;
 
 @Getter
 @Setter
@@ -20,6 +22,8 @@ public class TourDto {
     private String toLocation;
     private double distance;
     private double duration;
-    //private int popularity;
-    //private boolean childFriendly;
+    private int popularity;
+    private boolean childFriendly;
+    @JsonIgnore
+    private List<List<Double>> geometry;
 }

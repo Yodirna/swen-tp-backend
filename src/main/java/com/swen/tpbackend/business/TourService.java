@@ -1,5 +1,6 @@
 package com.swen.tpbackend.business;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swen.tpbackend.dal.dto.TourDto;
 import com.swen.tpbackend.dal.dto.TourMapper;
 import com.swen.tpbackend.dal.entity.TourEntity;
@@ -16,6 +17,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.List;
 
 @Setter
 @Getter
@@ -42,16 +46,30 @@ public class TourService {
         TourEntity toSave = mapper.toEntity(tourDto);
         logger.info("Saving tour... ");
 
-        // 2) save Entity
+        // 2) save Entity to get ID
         TourEntity saved = tourRepository.save(toSave);
         logger.info("Saved tour: " + saved);
 
-        // Print
-        System.out.println(saved); // For Debugging
+        // 3) generate the map image, now that we have an ID
+        try {
+            String imagePath = "/Users/ridoy/Downloads/tp-frontend-develop/images/route_" + saved.getId() + ".png";
+            String mapPath = generateMapImage(saved.getGeometry(), saved.getId(), imagePath);
+            saved.setMapImagePath(mapPath);
+            saved = tourRepository.save(saved); // update with image path
+        } catch (Exception e) {
+            logger.error("Map image generation failed: " + e.getMessage());
+            // Optionally set a placeholder or handle error
+        }
 
-        // 3) map back to DTO and return
-        return mapper.toDto(saved);
+        // Compute popularity & childFriendliness (now have an ID)
+        int popularity = tourLogRepository.countByTourId(saved.getId());
+        boolean childFriendly = isChildFriendly(saved.getId());
+
+        // 4) map back to DTO and return
+        return mapper.toDto(saved, popularity, childFriendly);
     }
+
+
 
     public TourEntity updateTour(TourEntity updated) {
         // Optionally: verify it exists first
@@ -103,6 +121,31 @@ public class TourService {
             ).toLowerCase();
             return haystack.contains(searchText.toLowerCase());
         }).collect(Collectors.toList());
+    }
+
+    public String generateMapImage(List<List<Double>> geometry, Long tourId, String imagePath) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        String routeJson = mapper.writeValueAsString(geometry);
+
+
+        ProcessBuilder pb = new ProcessBuilder(
+                "node", "renderRouteMap.js", routeJson, imagePath
+        );
+        pb.redirectErrorStream(true);
+
+        Process process = pb.start();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+        }
+        int exitCode = process.waitFor();
+        if (exitCode != 0) {
+            throw new RuntimeException("Node.js script failed with exit code " + exitCode);
+        }
+
+        return imagePath;
     }
 
 }

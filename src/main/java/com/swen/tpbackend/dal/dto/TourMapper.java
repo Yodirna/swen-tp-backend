@@ -19,10 +19,11 @@ public class TourMapper
         e.setDistance(dto.getDistance());
         e.setDuration(dto.getDuration());
         e.setMapImagePath(dto.getMapImagePath());
+        e.setGeometry(dto.getGeometry());
         return e;
     }
 
-    public TourDto toDto(TourEntity e) {
+    public TourDto toDto(TourEntity e,int popularity, boolean childFriendly) {
         TourDto dto = new TourDto();
         dto.setId(e.getId());
         dto.setName(e.getName());
@@ -33,6 +34,9 @@ public class TourMapper
         dto.setMapImagePath(e.getMapImagePath());
         dto.setDistance(e.getDistance());
         dto.setDuration(e.getDuration());
+        dto.setGeometry(e.getGeometry());
+        dto.setPopularity(popularity);
+        dto.setChildFriendly(childFriendly);
         return dto;
     }
 
