@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Setter
 @Getter
@@ -21,7 +23,9 @@ import java.util.stream.Collectors;
 public class TourService {
     private final TourRepository tourRepository;
     private TourLogRepository tourLogRepository;
+    private static final Logger logger = LogManager.getLogger(TourService.class);
 
+    @Autowired
     public TourService(TourRepository tourRepository, TourLogRepository tourLogRepository) {
         this.tourRepository = tourRepository;
         this.tourLogRepository = tourLogRepository;
@@ -36,9 +40,11 @@ public class TourService {
         TourMapper mapper = new TourMapper();
         // 1) map DTO → Entity
         TourEntity toSave = mapper.toEntity(tourDto);
+        logger.info("Saving tour... ");
 
         // 2) save Entity
         TourEntity saved = tourRepository.save(toSave);
+        logger.info("Saved tour: " + saved);
 
         // Print
         System.out.println(saved); // For Debugging
@@ -52,10 +58,12 @@ public class TourService {
         if (!tourRepository.existsById(updated.getId())) {
             throw new EntityNotFoundException("Cannot update non-existent tour");
         }
+        logger.info("Updating tour " + updated);
         return tourRepository.save(updated);
     }
 
     public List<TourEntity> getAllTours() {
+        logger.info("Getting all tours");
         return tourRepository.findAll();
     }
 
@@ -63,6 +71,7 @@ public class TourService {
         if (!tourRepository.existsById(id)) {
             throw new EntityNotFoundException("Tour not found");
         }
+        logger.info("Deleting tour " + id);
         tourRepository.deleteById(id);
     }
 

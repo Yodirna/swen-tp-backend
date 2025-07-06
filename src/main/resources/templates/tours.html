@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Tour List</title>
+</head>
+<body>
+<h1>Tours</h1>
+<ul>
+    <li th:each="tour : ${tours}">
+        <b th:text="${tour.name}"></b> from
+        <span th:text="${tour.fromLocation}"></span> to
+        <span th:text="${tour.toLocation}"></span>
+    </li>
+</ul>
+</body>
+</html>
